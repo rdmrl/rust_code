@@ -1,9 +1,20 @@
 use std::io;
+use rand::Rng;
 
 fn main() {
     // println is a macro and not a function.
     // Macros have a ! at the end.
-    println!("Guess the number!");
+    println!("Guess a number between 1 and 100!");
+
+    // Get a random number generator that is local to the current 
+    // thread of execution and seeded by the operating system.
+
+    // The gen_range takes a range and generates a random number
+    // within that range. The range is inclusive on the lower bound
+    // but exclusive on the upper bound.
+    let secret_number = rand::thread_rng().gen_range(1..100);
+
+    println!("The secret number is {}", secret_number);
 
     println!("Please input your guess.");
 
@@ -31,5 +42,5 @@ fn main() {
         .expect("Failed to read line.");
 
     // {} is a placeholder
-    println!("You guessed: {}", guess);
+    println!("You guessed {}", guess);
 }
