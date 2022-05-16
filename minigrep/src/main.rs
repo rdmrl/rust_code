@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -8,7 +9,10 @@ fn main() {
     // Config now contains owned String values.
     // The args variable is the owner of the argument values
     // and is only letting the parse_config method borrow them.
-    let config = Config::new(&args);
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
 
     println!("Searching for {}", config.query);
     println!("In file {}\n", config.filename);
@@ -25,15 +29,15 @@ struct Config {
 }
 
 impl Config {
-    fn new(args: &[String]) -> Config {
+    fn new(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 3 {
-            panic!("Not enough arguments");
+            return Err("not enough arguments");
         }
         // Using clone to allow the Config instance to own
         // these values.
         let query = args[1].clone();
         let filename = args[2].clone();
 
-        Config { query, filename }
+        Ok(Config { query, filename })
     }
 }
