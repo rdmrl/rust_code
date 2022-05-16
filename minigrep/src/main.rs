@@ -8,7 +8,7 @@ fn main() {
     // Config now contains owned String values.
     // The args variable is the owner of the argument values
     // and is only letting the parse_config method borrow them.
-    let config = parse_config(&args);
+    let config = Config::new(&args);
 
     println!("Searching for {}", config.query);
     println!("In file {}\n", config.filename);
@@ -24,11 +24,16 @@ struct Config {
     filename: String,
 }
 
-fn parse_config(args: &[String]) -> Config {
-    // Using clone to allow the Config instance to own
-    // these values.
-    let query = args[1].clone();
-    let filename = args[2].clone();
+impl Config {
+    fn new(args: &[String]) -> Config {
+        if args.len() < 3 {
+            panic!("Not enough arguments");
+        }
+        // Using clone to allow the Config instance to own
+        // these values.
+        let query = args[1].clone();
+        let filename = args[2].clone();
 
-    Config { query, filename }
+        Config { query, filename }
+    }
 }
