@@ -3,22 +3,32 @@ use std::fs;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("{:?}", args);
+    println!("{:?}\n", args);
 
-    let (query, filename) = parse_config(&args);
+    // Config now contains owned String values.
+    // The args variable is the owner of the argument values
+    // and is only letting the parse_config method borrow them.
+    let config = parse_config(&args);
 
-    println!("Searching for {}", query);
-    println!("In file {}", filename);
+    println!("Searching for {}", config.query);
+    println!("In file {}\n", config.filename);
 
-    let contents = fs::read_to_string(filename)
+    let contents = fs::read_to_string(config.filename)
         .expect("Something went wrong reading the file");
 
     println!("With text:\n{}", contents);
 }
 
-fn parse_config(args: &[String]) -> (&str, &str) {
-    let query = &args[1];
-    let filename = &args[2];
+struct Config {
+    query: String,
+    filename: String,
+}
 
-    (query, filename)
+fn parse_config(args: &[String]) -> Config {
+    // Using clone to allow the Config instance to own
+    // these values.
+    let query = args[1].clone();
+    let filename = args[2].clone();
+
+    Config { query, filename }
 }
