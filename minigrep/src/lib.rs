@@ -1,9 +1,11 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 
 pub struct Config {
     pub query: String,
     pub filename: String,
+    pub case_sensitive: bool,
 }
 
 impl Config {
@@ -16,7 +18,25 @@ impl Config {
         let query = args[1].clone();
         let filename = args[2].clone();
 
-        Ok(Config { query, filename })
+        // env::var returns a Result that will be the successful Ok
+        // variant that contains the value of the env variable if the
+        // env variable has been set.
+
+        // is_err is used on the Result to check whether it's an error
+        // and therefore unset, which means the search should be case-sensitive.
+
+        // If the env var is set to anything, is_err will return false and
+        // the search will be case insensitive.
+
+        // The value of the env var is not important, merely that it is set
+        // to something.
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+
+        Ok(Config { 
+            query, 
+            filename,
+            case_sensitive,
+        })
     }
 }
 
@@ -29,8 +49,14 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // Now it will return the error value from the current function
     // for the caller to handle.
 
+    let results = if config.case_sensitive {
+        search(&config.query, &contents)
+    } else {
+        search_case_insensitive(&config.query, &contents)
+    };
+
     // println!("With text:\n{}", contents);
-    for line in search(&config.query, &contents) {
+    for line in results {
         println!("{}", line);
     }
 
