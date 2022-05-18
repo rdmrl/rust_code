@@ -1,10 +1,10 @@
 use std::env;
 use std::fs;
 use std::process;
+use std::error::Error;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    println!("{:?}\n", args);
 
     // Config now contains owned String values.
     // The args variable is the owner of the argument values
@@ -17,10 +17,22 @@ fn main() {
     println!("Searching for {}", config.query);
     println!("In file {}\n", config.filename);
 
-    let contents = fs::read_to_string(config.filename)
-        .expect("Something went wrong reading the file");
+    run(config);
+}
+
+// Box<dyn Error> is a trait object. This function will return
+// a type that implements the Error trait but the particular type
+// need not be specified. dyn is short for dynamic.
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.filename)?;
+    // expect has been replaced with a ? to avoid panic!.
+    // Now it will return the error value from the current function
+    // for the caller to handle.
 
     println!("With text:\n{}", contents);
+
+    // Returns an OK value in the success case. The success type is ().
+    Ok(())
 }
 
 struct Config {
